@@ -79,9 +79,9 @@ Thumb_Types decode (const ALL_Types data) {
 ALU_Ops decode (const ALU_Type data) {
   if (data.instr.lsli.op == ALU_LSLI_OP) {
     // 315: insert code here to print lsls instruction: logical shift left immediate
-    // unsure about the imm5 data and if the reg are the correct ones
+    // unsure about if lsls or lsli
     if (opts.instrs) {
-        cout << "LSLS r" << data.instr.lsli.rd << ", r" << data.instr.lsli.rm << ", #" << data.instr.lsli.imm5 << endl;
+        cout << "lsls r" << data.instr.lsli.rd << ", r" << data.instr.lsli.rm << ", #" << data.instr.lsli.imm << endl;
     }
     return ALU_LSLI;
   }
@@ -436,6 +436,10 @@ BL_Ops decode (const BL_Type data) {
 
 int decode (const LDM_Type data) {
   // 315: add code to print ldm
+  // ld multiple, unsure if ldm or ldmia, unsure on how to deal with reg list 
+  if (opts.instrs) {
+    cout << "ldm r" << data.instr.ldm.rn << ", {" << data.instr.ldm.reg_list << "}" << endl;
+  }
   return LDM;
 }
 
