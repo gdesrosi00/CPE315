@@ -372,6 +372,7 @@ void execute() {
         case MISC_PUSH:
           // need to implement
            list = misc.instr.push.reg_list;
+           /*
            offset = 0;
             // used to count the registers being assigned
            for (i=0; i < 8; i++) {
@@ -379,7 +380,10 @@ void execute() {
                  offset += 1;
              }
            }
-           // iterate through the registers and writes to stack
+           //checking to see if lr is in list
+           if (misc.instr.push.m & 1)
+              offset += 1;
+           //iterate through the registers and writes to stack
            addr = SP - 4 * (offset);
            for (i = 0; i < 8; i++) {
                if (list & int(pow(double(2.0), double(i)))){
@@ -387,11 +391,44 @@ void execute() {
                   addr += 4;
                }
             }
-            //manual said to do this, but cpp said no
-            //SP = SP - 4*offset;
+            if (misc.instr.push.m & 1)
+               dmem.write(addr, rf[14]);
+            rf.write(SP_REG, SP - offset * 4);
+            */
+            addr = SP;
+            for (i = 0; i < 8; i++)
+            {
+               if(list & int(pow(2, i)))
+               {
+                  addr = addr - 4;
+                  dmem.write(addr, rf[i]);
+               }
+            }
+            if(misc.instr.push.m & 1)
+            {
+               addr -= 4;
+               dmem.write(addr, rf[14]);
+            }
+            rf.write(SP_REG, addr);
           break;
         case MISC_POP:
-          // need to implement
+          // need to implement CONTINUE HERE!!
+          list = misc.instr.pop.reg_list;
+          addr = SP;
+          if (misc.instr.pop.m & 1)
+          {
+             rf.write(PC_REG, dmem[addr]);
+             addr += 4;
+          }
+          for (i = 7; i > -1; i--)
+          {
+            if(list & int(pow(2, i)))
+            {
+               rf.write(i, dmem[addr]);
+               addr += 4;
+            }
+          }
+          rf.write(SP_REG, addr);
           break;
         case MISC_SUB:
           // functionally complete, needs stats
