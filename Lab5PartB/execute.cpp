@@ -332,6 +332,7 @@ void execute() {
           // needs stats and flags
           rf.write((sp.instr.mov.d << 3 ) | sp.instr.mov.rd, rf[sp.instr.mov.rm]);
           stats.numRegWrites += 1;
+          stats.numRegReads += 1;
           break;
         case SP_ADD:
         case SP_CMP:
