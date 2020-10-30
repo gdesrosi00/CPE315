@@ -157,6 +157,7 @@ DP_Ops decode (const DP_Type data) {
   }
 }
 
+// not needed until after fib is done !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SP_Ops decode (const SP_Type data) {
   if (data.instr.mov.op == 2) {
     if (opts.instrs) {
@@ -436,7 +437,7 @@ BL_Ops decode (const BL_Type data) {
 
 int decode (const LDM_Type data) {
   // 315: add code to print ldm
-  // ld multiple, unsure if ldm or ldmia, unsure on how to deal with reg list 
+  // ld multiple, unsure if ldm or ldmia, unsure on how to deal with reg list
   if (opts.instrs) {
     cout << "ldm r" << data.instr.ldm.rn << ", {" << data.instr.ldm.reg_list << "}" << endl;
   }

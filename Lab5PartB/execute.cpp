@@ -248,23 +248,18 @@ void execute() {
           // needs stats and flags
           rf.write(alu.instr.addr.rd, rf[alu.instr.addr.rn] + rf[alu.instr.addr.rm]);
           setCarryOverflow(rf[alu.instr.addr.rn], rf[alu.instr.addr.rm], OF_ADD);
-          stats.numRegReads += 2;
-          stats.numRegWrites += 1;
           break;
         case ALU_SUBR:
           break;
         case ALU_ADD3I:
           // needs stats and flags
           rf.write(alu.instr.add3i.rd, rf[alu.instr.add3i.rn] + alu.instr.add3i.imm);
-          stats.numRegReads += 1;
-          stats.numRegWrites += 1;
           break;
         case ALU_SUB3I:
           break;
         case ALU_MOV:
           // needs stats and flags
           rf.write(alu.instr.mov.rdn, alu.instr.mov.imm);
-          stats.numRegWrites += 1;
           break;
         case ALU_CMP:
           //cout << rf[alu.instr.cmp.rdn] << " " << alu.instr.cmp.imm << endl;
@@ -275,8 +270,6 @@ void execute() {
         case ALU_ADD8I:
           // needs stats and flags
           rf.write(alu.instr.add8i.rdn, rf[alu.instr.add8i.rdn] + alu.instr.add8i.imm);
-          stats.numRegReads += 1;
-          stats.numRegWrites += 1;
           break;
         case ALU_SUB8I:
           break;
@@ -331,8 +324,6 @@ void execute() {
         case SP_MOV:
           // needs stats and flags
           rf.write((sp.instr.mov.d << 3 ) | sp.instr.mov.rd, rf[sp.instr.mov.rm]);
-          stats.numRegWrites += 1;
-          stats.numRegReads += 1;
           break;
         case SP_ADD:
         case SP_CMP:
@@ -349,16 +340,11 @@ void execute() {
           // functionally complete, needs stats
           addr = rf[ld_st.instr.ld_st_imm.rn] + ld_st.instr.ld_st_imm.imm * 4;
           dmem.write(addr, rf[ld_st.instr.ld_st_imm.rt]);
-          stats.numRegReads += 2;
-          stats.numMemWrites += 1;
           break;
         case LDRI:
           // functionally complete, needs stats
           addr = rf[ld_st.instr.ld_st_imm.rn] + ld_st.instr.ld_st_imm.imm * 4;
           rf.write(ld_st.instr.ld_st_imm.rt, dmem[addr]);
-          stats.numRegReads += 1;
-          stats.numRegWrites += 1;
-          stats.numMemReads += 1;
           break;
         case STRR:
           // need to implement
@@ -385,8 +371,24 @@ void execute() {
       switch(misc_ops) {
         case MISC_PUSH:
           // need to implement
-            list = misc.inst.push.reg_list;
-            addr = sp-4*l 
+           list = misc.instr.push.reg_list;
+           offset = 0;
+            // used to count the registers being assigned
+           for (i=0; i < 8; i++) {
+             if (list & int(pow(2, i))){
+                 offset += 1;
+             }
+           }
+           // iterate through the registers and writes to stack
+           addr = SP - 4 * (offset);
+           for (i = 0; i < 8; i++) {
+               if (list & int(pow(double(2.0), double(i)))){
+                  dmem.write(addr, rf[i]);
+                  addr += 4;
+               }
+            }
+            //manual said to do this, but cpp said no
+            //SP = SP - 4*offset;
           break;
         case MISC_POP:
           // need to implement
@@ -410,8 +412,6 @@ void execute() {
         //cout << "reached PC change" << endl;
         rf.write(PC_REG, PC + 2 * signExtend8to32ui(cond.instr.b.imm) + 2);
       }
-      //Not positive with this one as I am not sure if reading the CPSR counts as as register read
-      stats.numRegReads += 1;
       break;
     case UNCOND:
       // Essentially the same as the conditional branches, but with no
@@ -452,8 +452,6 @@ void execute() {
       // needs stats
       decode(addsp);
       rf.write(addsp.instr.add.rd, SP + (addsp.instr.add.imm*4));
-      stats.numRegReads += 1;
-      stats.numRegWrites += 1;
       break;
     default:
       cout << "[ERROR] Unknown Instruction to be executed" << endl;
