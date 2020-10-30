@@ -23,6 +23,11 @@ unsigned int signExtend8to32ui(char i) {
   return static_cast<unsigned int>(static_cast<int>(i));
 }
 
+unsigned int signExtend11to32ui(int i){
+   int mask = 0b11111111111;
+   return static_cast<unsigned int>(static_cast<int>(i & mask));  
+}
+
 // This is the global object you'll use to store condition codes N,Z,V,C
 // Set these bits appropriately in execute below.
 ASPR flags;
@@ -30,6 +35,26 @@ ASPR flags;
 // CPE 315: You need to implement a function to set the Negative and Zero
 // flags for each instruction that does that. It only needs to take
 // one parameter as input, the result of whatever operation is executing
+
+
+//Takes the result from the operation
+void setNegativeZero(int result){
+   if (result == 0)
+      flags.Z = 1;   //Sets Z flag to 1 if the result is zero
+   else
+   {
+      flags.Z = 0;   //Else, result nonzero, Z flag is set to 0
+      //cout << "Z flag set to zero" << endl;
+   }
+
+   if (result < 0)
+   {
+      flags.N = 1;   //Sets N flag to 1 if the result is negative
+      //cout << "N flag set to one" << endl;
+   }
+   else
+      flags.N = 0;   //Else, number is zero or positive so N is set to 0      
+}
 
 // This function is complete, you should not have to modify it
 void setCarryOverflow (int num1, int num2, OFType oftype) {
@@ -99,7 +124,7 @@ static int checkCondition(unsigned short cond) {
       }
       break;
     case NE:
-      if (flags.Z ==0){
+      if (flags.Z == 0){
         return TRUE;
       }
       break;
@@ -144,7 +169,7 @@ static int checkCondition(unsigned short cond) {
       }
       break;
     case GE:
-      if (flags.N==flags.V){
+      if (flags.N == flags.V){
         return TRUE;
       }
       break;
@@ -159,7 +184,8 @@ static int checkCondition(unsigned short cond) {
       }
       break;
     case LE:
-      if (flags.Z == 1 && flags.N != flags.V){
+      //cout << (unsigned int)flags.Z << (unsigned int)flags.N << (unsigned int)flags.V << endl;
+      if (flags.Z == 1 || flags.N != flags.V){
          return TRUE;
       }
       break;
@@ -209,7 +235,6 @@ void execute() {
   rf.write(PC_REG, pctarget);
 
   itype = decode(ALL_Types(instr));
-
   // CPE 315: The bulk of your work is in the following switch statement
   // All instructions will need to have stats and cache access info added
   // as appropriate for that instruction.
@@ -222,6 +247,7 @@ void execute() {
         case ALU_ADDR:
           // needs stats and flags
           rf.write(alu.instr.addr.rd, rf[alu.instr.addr.rn] + rf[alu.instr.addr.rm]);
+          setCarryOverflow(rf[alu.instr.addr.rn], rf[alu.instr.addr.rm], OF_ADD);
           break;
         case ALU_SUBR:
           break;
@@ -236,6 +262,10 @@ void execute() {
           rf.write(alu.instr.mov.rdn, alu.instr.mov.imm);
           break;
         case ALU_CMP:
+          //cout << rf[alu.instr.cmp.rdn] << " " << alu.instr.cmp.imm << endl;
+          setNegativeZero(rf[alu.instr.cmp.rdn] - alu.instr.cmp.imm);
+          setCarryOverflow(rf[alu.instr.cmp.rdn], alu.instr.cmp.imm, OF_SUB);
+          //cout << "Z flag: " << flags.Z << " N flag: " << flags.N << endl;
           break;
         case ALU_ADD8I:
           // needs stats and flags
@@ -361,6 +391,7 @@ void execute() {
       // this should work for all your conditional branches.
       // needs stats
       if (checkCondition(cond.instr.b.cond)){
+        //cout << "reached PC change" << endl; 
         rf.write(PC_REG, PC + 2 * signExtend8to32ui(cond.instr.b.imm) + 2);
       }
       break;
@@ -368,6 +399,7 @@ void execute() {
       // Essentially the same as the conditional branches, but with no
       // condition check, and an 11-bit immediate field
       decode(uncond);
+      rf.write(PC_REG, PC + 2 * signExtend11to32ui(uncond.instr.b.imm) + 2);
       break;
     case LDM:
       decode(ldm);
