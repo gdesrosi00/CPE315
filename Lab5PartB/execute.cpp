@@ -1,6 +1,6 @@
 #include "thumbsim.hpp"
 // These are just the register NUMBERS
-#define PC_REG 15  
+#define PC_REG 15
 #define LR_REG 14
 #define SP_REG 13
 
@@ -25,7 +25,7 @@ unsigned int signExtend8to32ui(char i) {
 
 unsigned int signExtend11to32ui(int i){
    int mask = 0b11111111111;
-   return static_cast<unsigned int>(static_cast<int>(i & mask));  
+   return static_cast<unsigned int>(static_cast<int>(i & mask));
 }
 
 // This is the global object you'll use to store condition codes N,Z,V,C
@@ -53,7 +53,7 @@ void setNegativeZero(int result){
       //cout << "N flag set to one" << endl;
    }
    else
-      flags.N = 0;   //Else, number is zero or positive so N is set to 0      
+      flags.N = 0;   //Else, number is zero or positive so N is set to 0
 }
 
 // This function is complete, you should not have to modify it
@@ -114,7 +114,7 @@ void setCarryOverflow (int num1, int num2, OFType oftype) {
   }
 }
 
-// CPE 315: You're given the code for evaluating BEQ, and you'll need to 
+// CPE 315: You're given the code for evaluating BEQ, and you'll need to
 // complete the rest of these conditions. See Page 208 of the armv7 manual
 static int checkCondition(unsigned short cond) {
   switch(cond) {
@@ -279,7 +279,7 @@ void execute() {
           break;
       }
       break;
-    case BL: 
+    case BL:
       // This instruction is complete, nothing needed here
       bl_ops = decode(blupper);
       if (bl_ops == BL_UPPER) {
@@ -287,7 +287,7 @@ void execute() {
         instr2 = imem[PC];
         BL_Type bllower(instr2);
         if (blupper.instr.bl_upper.s) {
-          addr = static_cast<unsigned int>(0xff<<24) | 
+          addr = static_cast<unsigned int>(0xff<<24) |
             ((~(bllower.instr.bl_lower.j1 ^ blupper.instr.bl_upper.s))<<23) |
             ((~(bllower.instr.bl_lower.j2 ^ blupper.instr.bl_upper.s))<<22) |
             ((blupper.instr.bl_upper.imm10)<<12) |
@@ -303,7 +303,7 @@ void execute() {
         rf.write(PC_REG, PC + 2 + addr);
 
         stats.numRegReads += 1;
-        stats.numRegWrites += 2; 
+        stats.numRegWrites += 2;
       }
       else {
         cerr << "Bad BL format." << endl;
@@ -371,6 +371,8 @@ void execute() {
       switch(misc_ops) {
         case MISC_PUSH:
           // need to implement
+            list = misc.inst.push.reg_list;
+            addr = sp-4*l 
           break;
         case MISC_POP:
           // need to implement
@@ -391,7 +393,7 @@ void execute() {
       // this should work for all your conditional branches.
       // needs stats
       if (checkCondition(cond.instr.b.cond)){
-        //cout << "reached PC change" << endl; 
+        //cout << "reached PC change" << endl;
         rf.write(PC_REG, PC + 2 * signExtend8to32ui(cond.instr.b.imm) + 2);
       }
       break;
