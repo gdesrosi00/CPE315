@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#define SIZE 100
+#define SIZE 1000
 
 void matMult();
 void populateMatrix();
@@ -9,19 +9,19 @@ void printMatrix();
 int main()
 {
    //Initialize matrices of the given size
-   int A[SIZE][SIZE];
-   int B[SIZE][SIZE];
-   int C[SIZE][SIZE];
+   static int A[SIZE][SIZE];
+   static int B[SIZE][SIZE];
+   static int C[SIZE][SIZE];
    int height = SIZE;
    int width = SIZE;
 
-   //Populate matrices with the given value. 
+   //Populate matrices with the given value.
    //A and B are populated with 1 for simplicity
    //C is populated with 0 to allow for algorithm to work
    populateMatrix(A, height, width, 1);
    populateMatrix(B, height, width, 1);
    populateMatrix(C, height, width, 0);
-      
+
    matMult(C, A, B, height, width);
 
    //This line prints out the product matrix from the matMult function.
@@ -45,8 +45,9 @@ void matMult(int C[SIZE][SIZE], int A[SIZE][SIZE], int B[SIZE][SIZE], int height
       {
          for (k = 0; k < height /*- (height % 8) */; k++)
          {
+            //No unrolling
             C[i][j] = C[i][j] + (A[i][k] * B[k][j]);
-            
+
             //Level 2 loop unrolling (include original statement too):
             //k++;
             //C[i][j] = C[i][j] + (A[i][k] * B[k][j]);
