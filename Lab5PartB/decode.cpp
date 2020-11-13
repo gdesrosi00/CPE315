@@ -146,11 +146,10 @@ ALU_Ops decode (const ALU_Type data) {
 
 }
 
-////////////////////////////////////////////////////////////////////////
 DP_Ops decode (const DP_Type data) {
   if (data.instr.DP_Instr.op == DP_CMP) {
    // 315: insert code here to print cmp instruction
-   // I'm thinking this is cmp with two reg
+   // I'm thinking this is cmp with two reg, if so done
    if (opts.instrs) {
       cout << "cmp " << data.instr.cmp.rdn << ", " << data.instr.cmp.rm << endl;
    }
@@ -192,10 +191,51 @@ SP_Ops decode (const SP_Type data) {
   }
   else if (data.instr.add.op == 0) {
     // Here you'll need to SP_ADD similar to above
+   // I hope this is as similar to mov as I thought it was
+    if (opts.instrs) {
+     cout << "add";
+     if (data.instr.add.d) {
+        if (data.instr.add.rd == 5) {
+          cout << " sp, r" << setbase(10) << data.instr.add.rm << endl;
+        }
+        else if (data.instr.add.rm == 13) {
+          cout << " r" << setbase(10) << (8+data.instr.add.rd) << ", sp" << endl;
+        }
+        else {
+          cout << " r" << setbase(10) << (8+data.instr.add.rd) << ", r" << setbase(10) << data.instr.add.rm << endl;
+        }
+     }
+     else if (data.instr.add.rm == 13) {
+        cout << " r" << data.instr.add.rd << ", sp" << endl;
+     }
+     else {
+        cout << " r" << setbase(10) << data.instr.add.rd << ", r" << data.instr.add.rm << endl;
+     }
+    }
     return SP_ADD;
   }
   else if (data.instr.cmp.op == 1) {
     // Here you'll need to SP_CMP similar to above
+    if (opts.instrs) {
+     cout << "cmp";
+     if (data.instr.cmp.d) {
+      if (data.instr.cmp.rd == 5) {
+         cout << " sp, r" << setbase(10) << data.instr.cmp.rm << endl;
+      }
+      else if (data.instr.cmp.rm == 13) {
+         cout << " r" << setbase(10) << (8+data.instr.cmp.rd) << ", sp" << endl;
+      }
+      else {
+         cout << " r" << setbase(10) << (8+data.instr.cmp.rd) << ", r" << setbase(10) << data.instr.cmp.rm << endl;
+      }
+     }
+     else if (data.instr.cmp.rm == 13) {
+      cout << " r" << data.instr.cmp.rd << ", sp" << endl;
+     }
+     else {
+      cout << " r" << setbase(10) << data.instr.cmp.rd << ", r" << data.instr.cmp.rm << endl;
+     }
+   }
     return SP_CMP;
   }
   else {
