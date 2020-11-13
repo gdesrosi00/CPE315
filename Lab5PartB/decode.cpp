@@ -491,7 +491,7 @@ int decode (const LDM_Type data) {
   // 315: add code to print ldm
   // ld multiple, same reg list as push and pop
   if (opts.instrs) {
-      cout << "ldmia ";
+      cout << "ldm ";
       bool multiple = FALSE;
       cout << data.instr.ldm.rn << "!, {";
       if (data.instr.ldm.reg_list & 1) {
@@ -549,7 +549,7 @@ int decode (const LDM_Type data) {
 int decode (const STM_Type data) {
   // 315: add code to print STM
   // same as ldm situation
-  cout << "stmia ";
+  cout << "stm ";
   bool multiple = FALSE;
   cout << data.instr.stm.rn << "!, {";
   if (data.instr.stm.reg_list & 1) {
