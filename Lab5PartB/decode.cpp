@@ -491,7 +491,56 @@ int decode (const LDM_Type data) {
   // 315: add code to print ldm
   // ld multiple, same reg list as push and pop
   if (opts.instrs) {
-    cout << "ldm r" << data.instr.ldm.rn << ", {" << data.instr.ldm.reg_list << "}" << endl;
+      cout << "ldmia ";
+      bool multiple = FALSE;
+      cout << data.instr.ldm.rn << "!, {";
+      if (data.instr.ldm.reg_list & 1) {
+         cout << "r0";
+         multiple = TRUE;
+      }
+      if (data.instr.ldm.reg_list & 2) {
+         if (multiple)
+            cout << ", ";
+         cout << "r1";
+         multiple = TRUE;
+      }
+      if (data.instr.ldm.reg_list & 4) {
+        if (multiple)
+          cout << ", ";
+        cout << "r2";
+        multiple = TRUE;
+      }
+      if (data.instr.ldm.reg_list & 8) {
+        if (multiple)
+          cout << ", ";
+        cout << "r3";
+        multiple = TRUE;
+      }
+      if (data.instr.ldm.reg_list & 16) {
+        if (multiple)
+          cout << ", ";
+        cout << "r4";
+        multiple = TRUE;
+      }
+      if (data.instr.ldm.reg_list & 32) {
+        if (multiple)
+          cout << ", ";
+        cout << "r5";
+        multiple = TRUE;
+      }
+      if (data.instr.ldm.reg_list & 64) {
+        if (multiple)
+          cout << ", ";
+        cout << "r6";
+        multiple = TRUE;
+      }
+      if (data.instr.ldm.reg_list & 128) {
+        if (multiple)
+          cout << ", ";
+        cout << "r7";
+        multiple = TRUE;
+      }
+      cout << "}" << endl;
   }
   return LDM;
 }
@@ -500,6 +549,56 @@ int decode (const LDM_Type data) {
 int decode (const STM_Type data) {
   // 315: add code to print STM
   // same as ldm situation
+  cout << "stmia ";
+  bool multiple = FALSE;
+  cout << data.instr.stm.rn << "!, {";
+  if (data.instr.stm.reg_list & 1) {
+     cout << "r0";
+     multiple = TRUE;
+  }
+  if (data.instr.stm.reg_list & 2) {
+     if (multiple)
+        cout << ", ";
+     cout << "r1";
+     multiple = TRUE;
+  }
+  if (data.instr.stm.reg_list & 4) {
+    if (multiple)
+      cout << ", ";
+    cout << "r2";
+    multiple = TRUE;
+  }
+  if (data.instr.stm.reg_list & 8) {
+    if (multiple)
+      cout << ", ";
+    cout << "r3";
+    multiple = TRUE;
+  }
+  if (data.instr.stm.reg_list & 16) {
+    if (multiple)
+      cout << ", ";
+    cout << "r4";
+    multiple = TRUE;
+  }
+  if (data.instr.stm.reg_list & 32) {
+    if (multiple)
+      cout << ", ";
+    cout << "r5";
+    multiple = TRUE;
+  }
+  if (data.instr.stm.reg_list & 64) {
+    if (multiple)
+      cout << ", ";
+    cout << "r6";
+    multiple = TRUE;
+  }
+  if (data.instr.stm.reg_list & 128) {
+    if (multiple)
+      cout << ", ";
+    cout << "r7";
+    multiple = TRUE;
+  }
+  cout << "}" << endl;
   return STM;
 }
 
