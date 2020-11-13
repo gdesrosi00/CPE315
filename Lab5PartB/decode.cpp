@@ -81,7 +81,7 @@ ALU_Ops decode (const ALU_Type data) {
     // 315: insert code here to print lsls instruction: logical shift left immediate
     // unsure about if lsls or lsli
     if (opts.instrs) {
-        cout << "lsls r" << data.instr.lsli.rd << ", r" << data.instr.lsli.rm << ", #" << data.instr.lsli.imm << endl;
+        cout << "lsl r" << data.instr.lsli.rd << ", r" << data.instr.lsli.rm << ", #" << data.instr.lsli.imm << endl;
     }
     return ALU_LSLI;
   }
@@ -119,7 +119,7 @@ ALU_Ops decode (const ALU_Type data) {
     if (opts.instrs) {
       cout << "adds r" << data.instr.add8i.rdn << ", #" << setbase(10) << data.instr.add8i.imm << endl;
     }
-    return ALU_ADD8I;
+    return ALU_8I;
   }
   else if (data.instr.sub8i.op == ALU_SUB8I_OP) {
     // 315: insert code here to print subs instruction
@@ -249,18 +249,23 @@ LD_ST_Ops decode (const LD_ST_Type data) {
   if (data.instr.class_type.opA == LD_ST_REG_OPA) {
     if (data.instr.class_type.opB == LD_ST_OPB_LDRB) {
       // 315: write code to print ldrb
+      cout << "ldrb " << data.instr.ldrb.rt << ", [" << data.instr.ldrb.rn << ", " << data.instr.ldrb.rm << "]" << endl;
       return LDRBR;
     }
     else if (data.instr.class_type.opB == LD_ST_OPB_STRB) {
       // 315: write code to print strb
+      cout << "strb " << data.instr.strb.rt << ", [" << data.instr.strb.rn << ", " << data.instr.strb.rm << "]" << endl;
       return STRBR;
     }
     else if (data.instr.class_type.opB == LD_ST_OPB_LDR) {
       // 315: write code to print ldr
+      // ldr and str might have their instr name be strr and ldrr
+      cout << "ldr " << data.instr.ldr.rt << ", [" << data.instr.ldr.rn << ", " << data.instr.ldr.rm << "]" << endl;
       return LDRR;
     }
     else if (data.instr.class_type.opB == LD_ST_OPB_STR) {
       // 315: write code to print str
+      cout << "str " << data.instr.str.rt << ", [" << data.instr.str.rn << ", " << data.instr.str.rm << "]" << endl;
       return STRR;
     }
   }
