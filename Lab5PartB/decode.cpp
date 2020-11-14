@@ -161,7 +161,6 @@ DP_Ops decode (const DP_Type data) {
   }
 }
 
-// not needed until after fib is done !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SP_Ops decode (const SP_Type data) {
   if (data.instr.mov.op == 2) {
     if (opts.instrs) {
@@ -244,7 +243,7 @@ SP_Ops decode (const SP_Type data) {
   }
 
 }
-///////////////////////////////////////////////////////////////////
+
 LD_ST_Ops decode (const LD_ST_Type data) {
   if (data.instr.class_type.opA == LD_ST_REG_OPA) {
     if (data.instr.class_type.opB == LD_ST_OPB_LDRB) {
@@ -486,7 +485,6 @@ BL_Ops decode (const BL_Type data) {
   return BL_UPPER;
 }
 
-//////////////////////////////////////////////////////
 int decode (const LDM_Type data) {
   // 315: add code to print ldm
   // ld multiple, same reg list as push and pop
@@ -545,7 +543,6 @@ int decode (const LDM_Type data) {
   return LDM;
 }
 
-//////////////////////////////////////////////////////////
 int decode (const STM_Type data) {
   // 315: add code to print STM
   // same as ldm situation
@@ -602,7 +599,6 @@ int decode (const STM_Type data) {
   return STM;
 }
 
-/////////////////////////////////////////////////////////////
 int decode (const LDRL_Type data) {
   // 315: add code to print ldr
   // ldr literal, not sure if format is correct
