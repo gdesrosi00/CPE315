@@ -243,35 +243,61 @@ void execute() {
       add_ops = decode(alu);
       switch(add_ops) {
         case ALU_LSLI:
+          rf.write(alu.instr.lsli.rd, rf[alu.instr.lsli.rm] << alu.instr.lsli.imm);
+          setCarryOverflow(rf[alu.instr.lsli.rm], alu.instr.lsli.imm, OF_SHIFT);
+          setNegativeZero(alu.instr.lsli.imm);
           break;
         case ALU_ADDR:
           // needs stats and flags
           rf.write(alu.instr.addr.rd, rf[alu.instr.addr.rn] + rf[alu.instr.addr.rm]);
           setCarryOverflow(rf[alu.instr.addr.rn], rf[alu.instr.addr.rm], OF_ADD);
+          setNegativeZero(rf[alu.instr.addr.rn] + rf[alu.instr.addr.rm]);
+          stats.numRegReads += 2;
+          stats.numRegWrites += 1;
           break;
         case ALU_SUBR:
+          rf.write(alu.instr.subr.rd, rf[alu.instr.subr.rn] - rf[alu.instr.subr.rm]);
+          setCarryOverflow(rf[alu.instr.subr.rn], rf[alu.instr.subr.rm], OF_SUB);
+          setNegativeZero(rf[alu.instr.subr.rn] - rf[alu.instr.subr.rm]);
           break;
         case ALU_ADD3I:
           // needs stats and flags
           rf.write(alu.instr.add3i.rd, rf[alu.instr.add3i.rn] + alu.instr.add3i.imm);
+          setCarryOverflow(rf[alu.instr.add3i.rn], alu.instr.add3i.imm, OF_ADD);
+          setNegativeZero(rf[alu.instr.add3i.rn] + alu.instr.add3i.imm);
+           stats.numRegReads += 1;
+           stats.numRegWrites += 1;
           break;
         case ALU_SUB3I:
+          rf.write(alu.instr.sub3i.rd, rf[alu.instr.sub3i.rn] - alu.instr.sub3i.imm);
+          setCarryOverflow(rf[alu.instr.sub3i.rn], alu.instr.sub3i.imm, OF_SUB);
+          setNegativeZero(rf[alu.instr.sub3i.rn] - alu.instr.sub3i.imm);
           break;
         case ALU_MOV:
           // needs stats and flags
           rf.write(alu.instr.mov.rdn, alu.instr.mov.imm);
+          setNegativeZero(alu.instr.mov.imm);
+          stats.numRegWrites += 1;
           break;
         case ALU_CMP:
           //cout << rf[alu.instr.cmp.rdn] << " " << alu.instr.cmp.imm << endl;
           setNegativeZero(rf[alu.instr.cmp.rdn] - alu.instr.cmp.imm);
           setCarryOverflow(rf[alu.instr.cmp.rdn], alu.instr.cmp.imm, OF_SUB);
+          stats.numRegReads += 1;
           //cout << "Z flag: " << flags.Z << " N flag: " << flags.N << endl;
           break;
         case ALU_ADD8I:
           // needs stats and flags
           rf.write(alu.instr.add8i.rdn, rf[alu.instr.add8i.rdn] + alu.instr.add8i.imm);
+          setNegativeZero(rf[alu.instr.add8i.rdn] + alu.instr.add8i.imm);
+          setCarryOverflow(rf[alu.instr.add8i.rdn], alu.instr.add8i.imm, OF_ADD);
+          stats.numRegReads += 1;
+          stats.numRegWrites += 1;
           break;
         case ALU_SUB8I:
+          rf.write(alu.instr.sub8i.rdn, rf[alu.instr.sub8i.rdn] - alu.instr.sub8i.imm);
+          setNegativeZero(rf[alu.instr.sub8i.rdn] - alu.instr.sub8i.imm);
+          setCarryOverflow(rf[alu.instr.sub8i.rdn], alu.instr.sub8i.imm, OF_SUB);
           break;
         default:
           cout << "instruction not implemented" << endl;
@@ -314,7 +340,8 @@ void execute() {
       dp_ops = decode(dp);
       switch(dp_ops) {
         case DP_CMP:
-          // need to implement
+          setNegativeZero(rf[dp.instr.DP_Instr.rdn] - rf[dp.instr.DP_Instr.rm]);
+          setCarryOverflow(rf[dp.instr.DP_Instr.rdn], rf[dp.instr.DP_Instr.rm], OF_SUB); 
           break;
       }
       break;
@@ -324,10 +351,17 @@ void execute() {
         case SP_MOV:
           // needs stats and flags
           rf.write((sp.instr.mov.d << 3 ) | sp.instr.mov.rd, rf[sp.instr.mov.rm]);
+          setNegativeZero(rf[sp.instr.mov.rm]);
+          stats.numRegWrites += 1;
           break;
         case SP_ADD:
+          setNegativeZero(rf[((sp.instr.add.d << 3) | sp.instr.add.rd)] + rf[sp.instr.add.rm]);
+          setCarryOverflow(rf[((sp.instr.add.d << 3) | sp.instr.add.rd)], rf[sp.instr.add.rm], OF_ADD);
+          rf.write((sp.instr.add.d << 3) | sp.instr.add.rd, rf[(sp.instr.add.d << 3) | sp.instr.add.rd] + rf[sp.instr.add.rm]);
         case SP_CMP:
           // need to implement these
+          setNegativeZero(rf[((sp.instr.cmp.d << 3) | sp.instr.cmp.rd)] - rf[sp.instr.cmp.rm]);
+          setCarryOverflow(rf[((sp.instr.cmp.d << 3) | sp.instr.cmp.rd)], rf[sp.instr.cmp.rm], OF_SUB);
           break;
       }
       break;
@@ -340,29 +374,49 @@ void execute() {
           // functionally complete, needs stats
           addr = rf[ld_st.instr.ld_st_imm.rn] + ld_st.instr.ld_st_imm.imm * 4;
           dmem.write(addr, rf[ld_st.instr.ld_st_imm.rt]);
+          stats.numRegReads += 2;
+          stats.numMemWrites += 1;
           break;
         case LDRI:
           // functionally complete, needs stats
           addr = rf[ld_st.instr.ld_st_imm.rn] + ld_st.instr.ld_st_imm.imm * 4;
           rf.write(ld_st.instr.ld_st_imm.rt, dmem[addr]);
+          stats.numRegReads += 1;
+          stats.numRegWrites += 1;
+          stats.numMemReads += 1;
           break;
         case STRR:
-          // need to implement
+          addr = rf[ld_st.instr.ld_st_reg.rn] + rf[ld_st.instr.ld_st_reg.rm];
+          dmem.write(addr, rf[ld_st.instr.ld_st_reg.rt]);
+          stats.numRegReads += 3;
+          stats.numMemWrites += 1;
           break;
         case LDRR:
-          // need to implement
+          addr = rf[ld_st.instr.ld_st_reg.rn] + rf[ld_st.instr.ld_st_reg.rm];
+          rf.write(ld_st.instr.ld_st_reg.rt, dmem[addr]);
+          stats.numRegReads += 2;
+          stats.numRegWrites += 1;
+          stats.numMemReads += 1;
           break;
         case STRBI:
-          // need to implement
+          addr = rf[ld_st.instr.ld_st_imm.rn] + ld_st.instr.ld_st_imm.imm;
+          temp = dmem[addr];
+          temp.set_data_ubyte4(0, (unsigned char)rf[ld_st.instr.ld_st_imm.rt]);
+          dmem.write(addr, temp);
           break;
         case LDRBI:
-          // need to implement
+          addr = rf[ld_st.instr.ld_st_imm.rn] + ld_st.instr.ld_st_imm.imm;
+          rf.write(ld_st.instr.ld_st_imm.rt, dmem[addr].data_ubyte4(0));
           break;
         case STRBR:
-          // need to implement
+          addr = rf[ld_st.instr.ld_st_reg.rn] + rf[ld_st.instr.ld_st_reg.rm];
+          temp = dmem[addr];
+          temp.set_data_ubyte4(0, (unsigned char)rf[ld_st.instr.ld_st_reg.rt]);
+          dmem.write(addr, temp);
           break;
         case LDRBR:
-          // need to implement
+          addr = rf[ld_st.instr.ld_st_reg.rn] + rf[ld_st.instr.ld_st_reg.rm];                                        
+          rf.write(ld_st.instr.ld_st_reg.rt, dmem[addr].data_ubyte4(0));
           break;
       }
       break;
@@ -386,13 +440,11 @@ void execute() {
            //iterate through the registers and writes to stack
            addr = SP - 4 * (offset);
            for (i = 0; i < 8; i++) {
-               if (list & int(pow(double(2.0), double(i)))){
-                  dmem.write(addr, rf[i]);
                   addr += 4;
                }
             }
             if (misc.instr.push.m & 1)
-               dmem.write(addr, rf[14]);
+               dmem.write(addr, rf[16]);
             rf.write(SP_REG, SP - offset * 4);
             */
             addr = SP;
@@ -402,12 +454,16 @@ void execute() {
                {
                   addr = addr - 4;
                   dmem.write(addr, rf[i]);
+                  stats.numMemWrites += 1;
+                  stats.numRegReads += 1;
                }
             }
             if(misc.instr.push.m & 1)
             {
                addr -= 4;
                dmem.write(addr, rf[14]);
+               stats.numMemWrites += 1;
+               stats.numRegReads += 1;
             }
             rf.write(SP_REG, addr);
           break;
@@ -419,6 +475,8 @@ void execute() {
           {
              rf.write(PC_REG, dmem[addr]);
              addr += 4;
+             stats.numMemReads += 1;
+             stats.numRegWrites += 1;
           }
           for (i = 7; i > -1; i--)
           {
@@ -426,6 +484,8 @@ void execute() {
             {
                rf.write(i, dmem[addr]);
                addr += 4;
+               stats.numMemReads += 1;
+               stats.numRegWrites += 1;
             }
           }
           rf.write(SP_REG, addr);
@@ -433,10 +493,14 @@ void execute() {
         case MISC_SUB:
           // functionally complete, needs stats
           rf.write(SP_REG, SP - (misc.instr.sub.imm*4));
+          stats.numRegReads += 1;
+          stats.numRegWrites += 1;
           break;
         case MISC_ADD:
           // functionally complete, needs stats
           rf.write(SP_REG, SP + (misc.instr.add.imm*4));
+          stats.numRegReads += 1;
+          stats.numRegWrites += 1;
           break;
       }
       break;
@@ -449,20 +513,49 @@ void execute() {
         //cout << "reached PC change" << endl;
         rf.write(PC_REG, PC + 2 * signExtend8to32ui(cond.instr.b.imm) + 2);
       }
+      stats.numRegReads += 1;
+      stats.numRegWrites += 1;
       break;
     case UNCOND:
       // Essentially the same as the conditional branches, but with no
       // condition check, and an 11-bit immediate field
       decode(uncond);
       rf.write(PC_REG, PC + 2 * signExtend11to32ui(uncond.instr.b.imm) + 2);
+      stats.numRegReads += 1;
+      stats.numRegWrites += 1;
       break;
     case LDM:
       decode(ldm);
-      // need to implement
+      // load registers
+      list = ldm.instr.ldm.reg_list;
+      addr = rf[ldm.instr.ldm.rn];
+      for(i = 0; i < 8; i++)
+      {
+         if(list & int(pow(2, i)))
+         {
+            rf.write(i, dmem[addr]);
+            addr += 4;
+         }
+      }
+      // writeback
+      rf.write(ldm.instr.ldm.rn, addr);
       break;
     case STM:
       decode(stm);
-      // need to implement
+      // store registers
+      list = stm.instr.stm.reg_list;
+      addr = rf[stm.instr.stm.rn];
+      for(i = 0; i < 8; i++)
+      {
+         if(list & int(pow(2, i)))
+         {
+            dmem.write(addr, rf[i]);
+            addr += 4;
+         }
+      }
+
+      // writeback
+      rf.write(stm.instr.stm.rn, addr);
       break;
     case LDRL:
       // This instruction is complete, nothing needed
@@ -489,6 +582,9 @@ void execute() {
       // needs stats
       decode(addsp);
       rf.write(addsp.instr.add.rd, SP + (addsp.instr.add.imm*4));
+      stats.numRegReads += 2;
+      stats.numRegWrites += 1;
+
       break;
     default:
       cout << "[ERROR] Unknown Instruction to be executed" << endl;
