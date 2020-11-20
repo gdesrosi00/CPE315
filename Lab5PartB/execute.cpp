@@ -240,8 +240,8 @@ void execute() {
   // All instructions will need to have stats and cache access info added
   // as appropriate for that instruction.
   switch(itype) {
-      stats.instrs += 1;
     case ALU:
+      stats.instrs += 1;
       add_ops = decode(alu);
       switch(add_ops) {
         case ALU_LSLI:
@@ -308,6 +308,7 @@ void execute() {
       }
       break;
     case BL:
+      stats.instrs += 1;
       // This instruction is complete, nothing needed here
       bl_ops = decode(blupper);
       if (bl_ops == BL_UPPER) {
@@ -339,6 +340,7 @@ void execute() {
       }
       break;
     case DP:
+      stats.instrs += 1;
       dp_ops = decode(dp);
       switch(dp_ops) {
         case DP_CMP:
@@ -348,6 +350,7 @@ void execute() {
       }
       break;
     case SPECIAL:
+      stats.instrs += 1;
       sp_ops = decode(sp);
       switch(sp_ops) {
         case SP_MOV:
@@ -368,6 +371,7 @@ void execute() {
       }
       break;
     case LD_ST:
+      stats.instrs += 1;
       // You'll want to use these load and store models
       // to implement ldrb/strb, ldm/stm and push/pop
       ldst_ops = decode(ld_st);
@@ -423,6 +427,7 @@ void execute() {
       }
       break;
     case MISC:
+      stats.instrs += 1;
       misc_ops = decode(misc);
       switch(misc_ops) {
         case MISC_PUSH:
@@ -507,6 +512,7 @@ void execute() {
       }
       break;
     case COND:
+      stats.instrs += 1;
       decode(cond);
       // Once you've completed the checkCondition function,
       // this should work for all your conditional branches.
@@ -534,6 +540,7 @@ void execute() {
       stats.numRegWrites += 1;
       break;
     case UNCOND:
+      stats.instrs += 1;
       // Essentially the same as the conditional branches, but with no
       // condition check, and an 11-bit immediate field
       decode(uncond);
@@ -542,6 +549,7 @@ void execute() {
       stats.numRegWrites += 1;
       break;
     case LDM:
+      stats.instrs += 1;
       decode(ldm);
       // load registers
       list = ldm.instr.ldm.reg_list;
@@ -558,6 +566,7 @@ void execute() {
       rf.write(ldm.instr.ldm.rn, addr);
       break;
     case STM:
+      stats.instrs += 1;
       decode(stm);
       // store registers
       list = stm.instr.stm.reg_list;
@@ -576,6 +585,7 @@ void execute() {
       rf.write(stm.instr.stm.rn, addr);
       break;
     case LDRL:
+      stats.instrs += 1;
       // This instruction is complete, nothing needed
       decode(ldrl);
       // Need to check for alignment by 4
