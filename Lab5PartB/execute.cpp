@@ -239,6 +239,7 @@ void execute() {
   // All instructions will need to have stats and cache access info added
   // as appropriate for that instruction.
   switch(itype) {
+      stats.instrs += 1;
     case ALU:
       add_ops = decode(alu);
       switch(add_ops) {
@@ -603,6 +604,7 @@ void execute() {
       break;
     default:
       cout << "[ERROR] Unknown Instruction to be executed" << endl;
+      stats.instrs -= 1;
       exit(1);
       break;
   }
