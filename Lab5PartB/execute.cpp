@@ -235,6 +235,7 @@ void execute() {
   rf.write(PC_REG, pctarget);
 
   itype = decode(ALL_Types(instr));
+  int Future_Address;
   // CPE 315: The bulk of your work is in the following switch statement
   // All instructions will need to have stats and cache access info added
   // as appropriate for that instruction.
@@ -342,7 +343,7 @@ void execute() {
       switch(dp_ops) {
         case DP_CMP:
           setNegativeZero(rf[dp.instr.DP_Instr.rdn] - rf[dp.instr.DP_Instr.rm]);
-          setCarryOverflow(rf[dp.instr.DP_Instr.rdn], rf[dp.instr.DP_Instr.rm], OF_SUB); 
+          setCarryOverflow(rf[dp.instr.DP_Instr.rdn], rf[dp.instr.DP_Instr.rm], OF_SUB);
           break;
       }
       break;
@@ -416,7 +417,7 @@ void execute() {
           dmem.write(addr, temp);
           break;
         case LDRBR:
-          addr = rf[ld_st.instr.ld_st_reg.rn] + rf[ld_st.instr.ld_st_reg.rm];                                        
+          addr = rf[ld_st.instr.ld_st_reg.rn] + rf[ld_st.instr.ld_st_reg.rm];
           rf.write(ld_st.instr.ld_st_reg.rt, dmem[addr].data_ubyte4(0));
           break;
       }
@@ -510,8 +511,8 @@ void execute() {
       // Once you've completed the checkCondition function,
       // this should work for all your conditional branches.
       // needs stats
-     int Future_Address = PC + 2 * signExtend8to32ui(cond.instr.b.imm) + 2;
-     if(Future_Address > PC){
+     Future_Address = PC + 2 * signExtend8to32ui(cond.instr.b.imm) + 2;
+     if(Future_Address > PC) {
         if (checkCondition(cond.instr.b.cond)){
             stats.numForwardBranchesTaken += 1;
             rf.write(PC_REG, PC + 2 * signExtend8to32ui(cond.instr.b.imm) + 2);
@@ -520,7 +521,7 @@ void execute() {
             stats.numForwardBranchesNotTaken += 1;
         }
       }
-      elif(Future_Address < PC){
+      else if(Future_Address < PC){
           if (checkCondition(cond.instr.b.cond)){
               stats.numBackwardBranchesTaken += 1;
               rf.write(PC_REG, PC + 2 * signExtend8to32ui(cond.instr.b.imm) + 2);
