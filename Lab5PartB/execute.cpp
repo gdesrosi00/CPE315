@@ -509,9 +509,24 @@ void execute() {
       // Once you've completed the checkCondition function,
       // this should work for all your conditional branches.
       // needs stats
-      if (checkCondition(cond.instr.b.cond)){
-        //cout << "reached PC change" << endl;
-        rf.write(PC_REG, PC + 2 * signExtend8to32ui(cond.instr.b.imm) + 2);
+     int Future_Address = PC + 2 * signExtend8to32ui(cond.instr.b.imm) + 2;
+     if(Future_Address > PC_REG){
+        if (checkCondition(cond.instr.b.cond)){
+            stats.numForwardBranchesTaken += 1;
+            rf.write(PC_REG, PC + 2 * signExtend8to32ui(cond.instr.b.imm) + 2);
+        }
+        else{
+            stats.numForwardBranchesNotTaken += 1;
+        }
+      }
+      elif(Future_Address < PC_REG){
+          if (checkCondition(cond.instr.b.cond)){
+              stats.numBackwardBranchesTaken += 1;
+              rf.write(PC_REG, PC + 2 * signExtend8to32ui(cond.instr.b.imm) + 2);
+          }
+          else{
+              stats.numBackwardBranchesNotTaken += 1;
+          }
       }
       stats.numRegReads += 1;
       stats.numRegWrites += 1;
