@@ -549,7 +549,8 @@ void execute() {
       {
          if(list & int(pow(2, i)))
          {
-            dmem.write(addr, rf[i]);
+            dmem.write(rf[i], addr);
+            //dmem.write(addr, rf[i]);
             addr += 4;
          }
       }
