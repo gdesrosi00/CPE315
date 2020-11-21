@@ -244,7 +244,7 @@ void execute() {
 
   // This counts as a write to the PC register
   rf.write(PC_REG, pctarget);
-
+  //cout << PC << endl;
   itype = decode(ALL_Types(instr));
   int Future_Address;
   // CPE 315: The bulk of your work is in the following switch statement
@@ -550,7 +550,11 @@ void execute() {
       // Essentially the same as the conditional branches, but with no
       // condition check, and an 11-bit immediate field
       decode(uncond);
-      rf.write(PC_REG, PC + (2 * signExtend11to32ui(uncond.instr.b.imm) + 2));
+      //cout << "Decode: " << hex << rf[15] + 2*(int)((char)(uncond.instr.b.imm))+2 << endl;
+      //cout << "Without sign extend: " << uncond.instr.b.imm << endl;
+      //cout << "With sign extend: " << (2 * signExtend11to32ui(uncond.instr.b.imm) + 2) << endl;
+      //rf.write(PC_REG, PC + (2 * signExtend11to32ui(uncond.instr.b.imm) + 2));
+      rf.write(PC_REG, PC + (2*(int)((char)(uncond.instr.b.imm))+2));
       stats.numRegReads += 1;
       stats.numRegWrites += 1;
       break;
