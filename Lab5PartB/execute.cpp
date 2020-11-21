@@ -25,7 +25,18 @@ unsigned int signExtend8to32ui(char i) {
 
 unsigned int signExtend11to32ui(int i){
    int mask = 0b11111111111;
+   //int mask = 1000000000000;
    return static_cast<unsigned int>(static_cast<int>(i & mask));
+}
+
+
+static int BitCounter(unsigned short word) {
+   int temp = 0;
+   int i;
+   for (i=0; i < 8; i++){
+      temp += (word >> i) & 1;
+   }
+   return temp;
 }
 
 // This is the global object you'll use to store condition codes N,Z,V,C
@@ -449,13 +460,15 @@ void execute() {
                dmem.write(addr, rf[16]);
             rf.write(SP_REG, SP - offset * 4);
             */
-            addr = SP;
+            BitCount = BitCounter(misc.instr.push.reg_list) + misc.instr.push.m;
+            addr = SP - 4  * BitCount;
             for (i = 0; i < 8; i++)
             {
                if(list & int(pow(2, i)))
                {
-                  addr = addr - 4;
+                  //addr = addr - 4;
                   dmem.write(addr, rf[i]);
+                  addr += 4;
                   stats.numMemWrites += 1;
                   stats.numRegReads += 1;
                }
@@ -537,7 +550,7 @@ void execute() {
       // Essentially the same as the conditional branches, but with no
       // condition check, and an 11-bit immediate field
       decode(uncond);
-      rf.write(PC_REG, PC + 2 * signExtend11to32ui(uncond.instr.b.imm) + 2);
+      rf.write(PC_REG, PC + (2 * signExtend11to32ui(uncond.instr.b.imm) + 2));
       stats.numRegReads += 1;
       stats.numRegWrites += 1;
       break;
@@ -566,14 +579,16 @@ void execute() {
       {
          if(list & int(pow(2, i)))
          {
-            dmem.write(rf[i], addr);
-            //dmem.write(addr, rf[i]);
+            //dmem.write(rf[i], addr);
+            dmem.write(addr, rf[i]);
             addr += 4;
          }
       }
 
       // writeback
-      rf.write(stm.instr.stm.rn, addr);
+      //rf.write(stm.instr.stm.rn, addr);
+      BitCount = BitCounter(stm.instr.stm.reg_list);
+      rf.write(stm.instr.stm.rn, rf[stm.instr.stm.rn] + BitCount * 4);
       break;
     case LDRL:
       // This instruction is complete, nothing needed
